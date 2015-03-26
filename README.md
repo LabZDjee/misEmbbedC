@@ -1,2 +1,2 @@
 # misEmbbedC
-Misc and parse C files of general purpose in embedded constrained environements
+Misc C files of general purpose interest in embedded constrained environements
