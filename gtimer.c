@@ -49,9 +49,9 @@ TimerType;
 static void init_Timer    (byte id);
 
 /****************************************************************************/
-/*                                                                                                              */
-/*                  EXPORTED / IMPORTED GLOBAL VARIABLES                             */
-/*                                                                                                              */
+/*                                                                          */
+/*                  EXPORTED / IMPORTED GLOBAL VARIABLES                    */
+/*                                                                          */
 /****************************************************************************/
 
 volatile boolean bTimerInterruptFired; // true when the interrupt triggered and further process is needed
@@ -62,6 +62,7 @@ volatile boolean bTimerInterruptFired; // true when the interrupt triggered and 
 /*                                                                          */
 /****************************************************************************/
 
+/* array of gTimers */
 static TimerType Timer [_N_GTIMERS];
 
 /****************************************************************************/
@@ -90,10 +91,10 @@ byte id;
 for (id = 0; id < _N_GTIMERS; id++)
   {
   if (!Timer [id].req)
-    {
+   {
     Timer [id].req = TRUE;
     break;
-    }
+   }
   }
 
 return (id);
@@ -136,8 +137,8 @@ void gtimerInitAndStart (byte id, dword count, boolean bAuto)
  if(count<2)
   count = 2;
  Timer[id].count   = count;               // set count value
- Timer[id].count0  = count;               // set count value
- Timer[id].bAuto = bAuto;                   // auto restarts at timeout
+ Timer[id].count0  = count;               // set reload value
+ Timer[id].bAuto = bAuto;                 // auto restarts at timeout
  Timer[id].timeout = FALSE;               // clears timeout condition
  Timer[id].running = TRUE;                // start timer
 }
@@ -162,7 +163,7 @@ void gtimerFreeze (byte id)
 void gtimerResume (byte id)
 /****************************************************************************/
 {
- if(Timer[id].req!=FALSE ||  Timer[id].bAuto==FALSE && Timer[id].timeout)
+ if(Timer[id].req!=FALSE ||  (Timer[id].bAuto==FALSE && Timer[id].timeout))
   Timer[id].running = TRUE;     // start timer with last count
 }
 
@@ -195,7 +196,7 @@ boolean gtimerTO (byte id)
 dword gtimerGetTimeToGo (byte id)
 /****************************************************************************/
 {
-return (Timer [id].count);
+ return (Timer [id].count);
 }
 
 #ifdef GTIMER_IMPLEMENTS_CALLBACK
@@ -206,6 +207,13 @@ void gtimerSetCallback (byte id, gtimerCallbackPtr pCallback, dword inValue, dwo
  Timer [id].pCallback = pCallback;
  Timer [id].inValue = inValue;
  Timer [id].pOutValue = pOutValue;
+}
+
+/****************************************************************************/
+void gtimerSetCallbackInput (byte id, dword inValue )
+/****************************************************************************/
+{
+ Timer [id].inValue = inValue;
 }
 
 /****************************************************************************/
@@ -230,7 +238,7 @@ static void init_Timer (byte id)
 {
  TimerType* pTimer=Timer+id;
 
- pTimer->req = TRUE; // Timers are automatically requested and statically managed by IDs!!!!
+ pTimer->req = FALSE;
  pTimer->count = 0;
  pTimer->count0 = 0;
  pTimer->running = FALSE;

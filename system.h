@@ -1,0 +1,12 @@
+#ifndef __SYSTEM_H_INCLUDED__
+#define __SYSTEM_H_INCLUDED__
+
+#define GTIMER_TICK_MS (40)
+#define SWUART1_SEND_TIMER_ID (0)
+#define SWUART1_RECEIVE_TIMER_ID (1)
+
+#define GTIMER_IMPLEMENTS_CALLBACK
+
+#define _N_GTIMERS (2)
+
+#endif // __SYSTEM_H_INCLUDED__
