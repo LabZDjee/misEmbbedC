@@ -13,7 +13,7 @@
  *
  * For each of them, timer count can be started or stop, a timeout condition can be tested against a duration.
  * Timer can stop or automatically restart after this given duration.
- * It's also possible to associate a call-back function (of type #gtimerCallbackPtr)which is called when this duration has elapsed\n
+ * It's also possible to associate a call-back function (of type \c gtimerCallbackPtr)which is called when this duration has elapsed\n
  * None of those functions are thread safe and interrupt safe: so #gtimerOnTick as it is should not be called within
  * an interrupt but in main loop. However #gtimerOnTick will reset a flag #bTimerInterruptFired which
  * should be set by the interrupt. So #gtimerOnTick should be called when #bTimerInterruptFired is true\n
@@ -22,9 +22,11 @@
  * delay of 49 days can be measured
  * \note management of callbacks take some more RAM in internal arrays. To avoid using memory for not needed functionalities,
  * \c GTIMER_IMPLEMENTS_CALLBACK should be defined in order to have this callback mechanism implemented
- * \warning For efficiency purpose, zero-based id of timers given as parameters of most of the functions
+ * \warning - for efficiency purpose, zero-based id of timers given as parameters of most of the functions
  * of this module are not controlled to be less than _N_GTIMERS. This is not safe and imposes external control or double check they cannot
  * be higher than expected
+ * - in order to ensure a certain accuracy the minimum delay for #gtimerInitAndStart is 2 ticks
+ *
  * \file gtimer.h
  * \brief header of the gTimer module
  * \author Gerard Gauthier
@@ -155,10 +157,11 @@ byte gtimerRelease (byte id /**< zero-based timer id */);
 
 /** \brief **starts a given timer to run**
  *
- * The timer stops after \c ticks *times* \c GTIMER_TICK_MS
+ * The timer stops after \p ticks *times* \c GTIMER_TICK_MS
  * Use the \ref gtimerTO timeout function to check whether or not the timer has elapsed.
  * If \c bAuto is \c TRUE, timer constantly runs, reloading its value as long it
  * has reached its timeout
+ * \warning minimum value for \p ticks is 2!
  */
 void gtimerInitAndStart (byte id /**< zero-based timer id */,
                          dword ticks /**< number of timer ticks before time-out */,
