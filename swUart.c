@@ -22,7 +22,7 @@
 #define RCPT_FIFO_SIZE_MASK (RCPT_FIFO_SIZE-1) /* divide mask using the '&' operator */
 
 /* machine states for transmission */
-typedef enum { swUTIdle, swUTStart, swUTBit, swUTParity, swUTStop1, swUTStop2 } swUartTxStateE;
+typedef enum { swUTIdle, swUTEdge, swUTStart, swUTBit, swUTParity, swUTStop1, swUTStop2 } swUartTxStateE;
 /* machine states for reception */
 typedef enum { swURIdle, swURStart, swURSBit, swURParity, swURStop1, swURStop2 } swUartRxStateE;
 
@@ -72,7 +72,7 @@ typedef struct
  */
 typedef struct _swUartTxStruct
 {
-    swUartConfigurationT* pCfg; /* configuration */
+    const swUartConfigurationT* pCfg; /* configuration */
     swUartTxStateMachineT sm; /* state machine */
 } swUartTxStruct;
 
@@ -81,7 +81,7 @@ typedef struct _swUartTxStruct
  */
 typedef struct _swUartRxStruct
 {
-    swUartConfigurationT* pCfg; /* configuration */
+    const swUartConfigurationT* pCfg; /* configuration */
     swUartRxStateMachineT sm; /* state machine */
 } swUartRxStruct;
 
@@ -106,6 +106,10 @@ static dword swUartSendCallBack(UNUSED_FCT_P byte id, dword value)
     default:
     case swUTIdle: /* should never happen, as send routine which start timer set state to swUTStart */
         return(0);
+    case swUTEdge:
+    	pSM->txFct(swUSpace_Low);
+    	pSM->state=swUTStart;
+    	goto reloadTimerAndReturn;
     case swUTStart:
         pSM->state=swUTBit; /* simply next stage, initializing bit counters */
         pSM->c.bitPos=pSM->c.nbOfBitsSet=0;
@@ -163,12 +167,17 @@ reloadTimerAndReturn:
     return(0);
 }
 
-boolean swUartSendInit(byte swUartTxId, swUartConfigurationT* pCfg, byte timerId, swUartHwSetTxFct txFct)
+boolean swUartSendInit(byte swUartTxId, const swUartConfigurationT* pCfg, byte timerId, swUartHwSetTxFct txFct)
 {
     swUartTxStateMachineT* pSM=&_sendSArray[swUartTxId].sm;
     /* gate keeper */
     if(swUartTxId>=QTY_OF_SENDERS || pCfg==NULL || txFct==NULL)
         return(FALSE);
+    if(pCfg->bitWidth<2)
+        return(FALSE); /* cannot handle less than 2 gTimer ticks */
+    /* makes sure number of bits sits within boundaries */
+    if(pCfg->nbBits<MIN_BITS_SERIALIZED || pCfg->nbBits>MAX_BITS_SERIALIZED)
+     return(FALSE);
     _sendSArray[swUartTxId].pCfg=pCfg; /* hooks configuration */
     pSM->c.timerId=timerId;
     pSM->txFct=txFct;
@@ -178,11 +187,6 @@ boolean swUartSendInit(byte swUartTxId, swUartConfigurationT* pCfg, byte timerId
     gtimerFreeze(timerId);
     /* installs callback with transmit data array reference as an immutable parameter */
     gtimerSetCallback(timerId, swUartSendCallBack, (long)_sendSArray+swUartTxId, NULL);
-    /* makes sure number of bits sits within boundaries */
-    if(pCfg->nbBits<MIN_BITS_SERIALIZED)
-        pCfg->nbBits=MIN_BITS_SERIALIZED;
-    else if(pCfg->nbBits>MAX_BITS_SERIALIZED)
-        pCfg->nbBits=MAX_BITS_SERIALIZED;
     return(TRUE);
 }
 
@@ -202,11 +206,9 @@ boolean swUartSendChar(byte swUartTxId, word ch)
     /* primes state machine */
     pSM->bInProgress=TRUE;
     pSM->c.serialChar=ch;
-    pSM->state=swUTStart;
+    pSM->state=swUTEdge;
     /* sets the timer at one bit delay, in manual mode */
     gtimerInitAndStart(pSM->c.timerId, (dword)_sendSArray[swUartTxId].pCfg->bitWidth, FALSE);
-    /* sets start bit */
-    pSM->txFct(swUSpace_Low);
     return(TRUE);
 }
 
@@ -215,7 +217,7 @@ boolean swUartSendData(byte swUartTxId, const void* data, word dataSize, word* p
     const word* pW;
     const byte* pB;
     if(swUartTxId>=QTY_OF_SENDERS || _sendSArray[swUartTxId].pCfg==NULL || pIndex==NULL)
-     return(TRUE); /* don't pass gatekeeper: reports everything has done */
+     return(TRUE); /* don't pass gate-keeper: reports everything as done */
     if(swUartSendIsBusy(swUartTxId)==FALSE)
     {   /* can proceed with next char */
         if(*pIndex==dataSize)
@@ -227,7 +229,7 @@ boolean swUartSendData(byte swUartTxId, const void* data, word dataSize, word* p
         }
         else  /* fits within a byte */
         {
-            pB=(byte*)data;  /* considers data buufer accordingly */
+            pB=(byte*)data;  /* considers data buffer accordingly */
             swUartSendChar(swUartTxId, pB[(*pIndex)++]);
         }
     }
@@ -347,7 +349,7 @@ storeValueStage:
             byte newIndex=(pSM->rxFifoWriteIndex+1)&RCPT_FIFO_SIZE_MASK; /* useful to pre-calculate new write index in case of overrun */
             pSM->rxFifo[pSM->rxFifoWriteIndex]=(RCPT_FIFO_TYPE)pSM->c.serialChar;
             if(pSM->rxFifoEmpty==FALSE)
-                if(pSM->rxFifoWriteIndex==pSM->rxFifoWriteIndex) /* ouch, overrun */
+                if(pSM->rxFifoWriteIndex==pSM->rxFifoReadIndex) /* ouch, overrun */
                 {
                     pSM->error|=1<<swUOverrunError;
                     pSM->rxFifoReadIndex=newIndex; /* one character lost */
@@ -368,21 +370,24 @@ reloadTimerAndReturn:
     return(0);
 }
 
-boolean swUartReceiveInit(byte swUartRxId, swUartConfigurationT* pCfg, byte timerId, swUartHwGetRxFct rxFct)
+boolean swUartReceiveInit(byte swUartRxId, const swUartConfigurationT* pCfg, byte timerId, swUartHwGetRxFct rxFct)
 {
     swUartRxStateMachineT* pSM=&_receiveSArray[swUartRxId].sm;
     if(swUartRxId>=QTY_OF_RECEIVERS || pCfg==NULL || rxFct==NULL)
         return(FALSE);
     if(pCfg->bTripleScan)
     {   /* noise canceler */
-        if(pCfg->bitWidth&2)
+        if((pCfg->bitWidth&(2*4-1))!=0) /* x2 because of gTimer minimum delay */
             return(FALSE); /* cannot handle 1/4 bit delay: error */
     }
-    else
+    else /* no noise canceler */
     {
-        if(pCfg->bitWidth&1) /* cannot handle 1/2 bit delay: error */
-            return(FALSE);
+        if((pCfg->bitWidth&(2*2-1))!=0) /* x2 because of gTimer minimum delay */
+            return(FALSE);  /* cannot handle 1/2 bit delay: error */
     }
+    /* makes sure number of bits sits within boundaries */
+    if(pCfg->nbBits<MIN_BITS_SERIALIZED || pCfg->nbBits>MAX_BITS_SERIALIZED)
+     return(FALSE);
     _receiveSArray[swUartRxId].pCfg=pCfg;
     pSM->c.timerId=timerId;
     pSM->bInProgress=FALSE;
@@ -395,11 +400,6 @@ boolean swUartReceiveInit(byte swUartRxId, swUartConfigurationT* pCfg, byte time
     gtimerFreeze(timerId);
      /* installs callback with transmit data array reference as an immutable parameter */
     gtimerSetCallback(timerId, swUartReceiveCallBack, (long)_receiveSArray+swUartRxId, NULL);
-     /* makes sure number of bits sits within boundaries */
-    if(pCfg->nbBits<MIN_BITS_SERIALIZED)
-        pCfg->nbBits=MIN_BITS_SERIALIZED;
-    else if(pCfg->nbBits>MAX_BITS_SERIALIZED)
-        pCfg->nbBits=MAX_BITS_SERIALIZED;
     return(TRUE);
 }
 

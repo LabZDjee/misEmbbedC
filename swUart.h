@@ -7,9 +7,10 @@
  * =======
  * This module, \c swUart, is a working example of an asynchronous reception/transmission (Rx/Tx) implementation
  * completely software driven and associated with another software driven module: \c gTimer, \ref gTimer with
- * provision for callbacks\n
+ * provision for callback\n
  * Both modules are generic. They are mainly intended to work in embedded contexts which are _not_ extremely
  * hard time constraint\n
+ *
  * Details
  * =======
  * Module \c gTimer run in the main loop\n
@@ -31,8 +32,6 @@
  * - its configuration \ref swUartConfigurationT,
  * - a dedicated \ref gTimer, and
  * - an I/O function of type \ref swUartHwGetRxFct whose role is to read the reception line
- * How to
- * ======
  *
  * \file swUart.h
  * \brief header of the swUart module
@@ -73,10 +72,7 @@ typedef swUartDataStateE (*swUartHwGetRxFct)(void);
  * in this structure and in the module management\n
  * the fact is it has been estimated extremely unlikely to deal with bit rates imposing this value to be
  * above 65,535
- * \warning
- *  - cannot be read-only as initializer *may* correct sick parameters, however immutable after initialization
- *  - \p bitWidth has to be _even_ in case of \p bTripleScan is \c FALSE and a multiple of _four_ in case
- *    \p bTripleScan is \c TRUE
+ * \warning \p bitWidth has restrictions! See #swUartSendInit and #swUartReceiveInit
  */
 typedef struct _swUartConfigurationT
 {
@@ -95,10 +91,11 @@ typedef struct _swUartConfigurationT
  *
  * this initializer should be called before any call to send function with the same \c swUartTxId
  * \return TRUE if parameters are acceptable (no reference is NULL, \c swUartTxId is within bounds...)
+ * \warning \c bitWidth of configuration parameter should be set to 2 at least (restriction in gTimer)
  *
  */
 boolean swUartSendInit(byte swUartTxId /**< swUART Tx index, zero-based */,
-                       swUartConfigurationT* pConfig /**< reference to configuration parameters */,
+                       const swUartConfigurationT* pConfig /**< reference to configuration parameters */,
                        byte timerId /**< index of the generic timer that will controls proper delays */,
                        swUartHwSetTxFct txFct /**< I/O function to set a space or a break position */);
 
@@ -115,12 +112,12 @@ boolean swUartSendChar(byte swUartTxId /**< swUart Tx index, zero-based */, word
  */
 boolean swUartSendIsBusy(byte swUartTxId /**< swUart Tx index, zero-based */);
 
-/** \brief send a stream of data
+/** \brief sends a stream of data
  *
- * sends a stream of data of size dataSz\n
- * the caller must provide reference to a word which stores where we are in the sending: \p pIndex\n
- * the value at this reference address must be set to zero\n
- * \note what \p data references is an array of bytes if field \n nbBits in configuration structure
+ * sends a stream of data of size \p dataSz \n
+ * the caller must provide reference to a word which stores where we are in the sending: \p pIndex \n
+ * the value at this reference address must be set to zero
+ * \note what \p data references is an array of bytes if field \c nbBits in configuration structure
  * \ref swUartConfigurationT is less than 9 and it is an array of _words_ otherwise
  * \return \c TRUE when send streaming is completed
  */
@@ -137,9 +134,12 @@ boolean swUartSendData(byte swUartTxId /**< swUart Tx index, zero-based */,
  *
  * this initializer should be called before any call to receive function with the same \p swUartRxId
  * \return TRUE if parameters are acceptable (no reference is NULL, \p swUartRxId is within bounds...)
+ * \warning configuration parameter \c bitWidth has restrictions:
+ * - should be a multiple of _4_ if configuration parameter \c bTripleScan is \c FALSE
+ * - should be a multiple of _8_ if configuration parameter \c bTripleScan is \c TRUE
  */
 boolean swUartReceiveInit(byte swUartRxId /**< swUART Rx index, zero-based */,
-                          swUartConfigurationT* pCfg /**< reference to configuration parameters */,
+                          const swUartConfigurationT* pCfg /**< reference to configuration parameters */,
                           byte timerId /**< index of the generic timer that will controls proper delays */,
                           swUartHwGetRxFct rxFct /**< I/O function to sense a space or a break position */);
 
@@ -191,8 +191,99 @@ word swUartGetChar(byte swUartRxId /**< swUART Rx index, zero-based */);
 boolean swUartReceiveGetAndClearError(byte swUartRxId /**< swUart Tx index, zero-based */,
                                       boolean bClearError /**< \c TRUE, should the error be cleared */);
 
+/************************************************************
+ * some more details for doxygen
+ ************************************************************/
+
 /**
  * \}
+ * \addtogroup swUart
+ * How to
+ * ======
+ * In order to illustrate a typical use of this module for both transmission and reception,
+ * some code snippets for one UART are presented here\n
+ * First implement <tt>void setTxOutput(swUartDataStateE s)</tt> and <tt>swUartDataStateE getRxInput(void)</tt> to
+ * inform the module how to handle transmission and reception actual signals. E.g.
+ * \code
+void setTxOutput(swUartDataStateE s)
+ {
+  _setIo(XX, s==swUSpace_Low?0:1);
+ }
+swUartDataStateE getRxInput(void)
+ {
+  return(_getIo(XY)==0?swUSpace_Low:swUMark_High);
+ }
+ * \endcode
+ * Then initialize soft timer manager, dedicate two timers for Tx and Rx, and initialize TX and Rx with
+ * a configuration structure. Timer ID's have to be defined in header file: \c system.h
+ * \code
+const byte uartIdx=0;
+swUartConfigurationT swUartCfg={
+     nbBits:8, parity:swUEvenParity, stop:swU2Stop, bitWidth:4, bTripleScan:FALSE};
+gtimerInitModule();
+gtimerReserve(SWUART1_TX_TIMER_ID);
+gtimerReserve(SWUART1_RX_TIMER_ID);
+swUartSendInit(uartIdx, &swUartCfg, SWUART1_TX_TIMER_ID, setTxOutput);
+swUartReceiveInit(uartIdx, &swUartCfg, SWUART1_RX_TIMER_ID, getRxInput);
+ * \endcode
+ * Follows a test example implemented in the \c main loop. This example constantly send the same string over and over again
+ * and tries to catch what is sent to display it. Two strategies to used to read the incoming stream:
+ * - #swUartGetChar to pull characters one by one from the FIFO
+ * - have a look into the FIFO with #swUartHowManyChars, #swUartPeekNChar, and flush it with #swUartFlushChars
+ *
+ * Call to #swUartReceiveScanForStart is necessary to start the Rx state machine which is managed by the timer\n
+ * It is interesting noting this example directly or indirectly calls almost all the methods of this module
+ * \code
+while(1)
+{
+   static word index=0;
+   static char* pCh="Hello world!\n"; // be careful: RCPT_FIFO_SIZE_IN_BITS should be 4 or more in swUart module
+   static boolean bUsePeek=FALSE; // flag to alternate use of PeekN and GetChar to read received chars
+   byte n, p;
+   word ch;
+
+    if(bTimerInterruptFired) // flag coming from timer interrupt
+     gtimerOnTick(); // manages gTimer
+    // send text gradually until returns TRUE, indicating all is done
+    if(swUartSendData(uartIdx, pCh, strlen(pCh), &index))
+     index=0; // sends over and over again
+    swUartReceiveScanForStart(0); // scans start condition which will start Rx stat machine
+    if(swUartReceiveGetAndClearError(uartIdx, FALSE)) // scan errors
+    {
+      // this one will read errors and clear them
+      printf("Errors!!! Value: %i\n", (int)swUartReceiveGetAndClearError(uartIdx, TRUE));
+    }
+    if(bUsePeek) // will read inbound characters through 'peek' mechanism
+    {
+     // will peek last received until we got an LF
+     n=swUartHowManyChars(uartIdx);
+     if(n>0)
+     {
+      if(swUartPeekNChar(uartIdx, n-1)=='\n')
+      {
+       // we got the LF: get string through peekNChar function and flush
+       for(p=0; p<n; p++)
+       {
+        ch=swUartPeekNChar(uartIdx, p);
+        printf("Peeked: '%c' - 0x%03x\n", _printable(ch), ch); // _printable returns space if ch is not 'nice'
+       }
+       swUartFlushChars(uartIdx);
+       bUsePeek=FALSE; // switch to getChar method for next string to fetch
+      }
+     }
+    }
+    else
+    {
+     ch=swUartGetChar(uartIdx);
+     if(ch!=0xffff) // char is valid
+     {
+      printf("Received: '%c' - 0x%03x\n", _printable(ch), ch);
+      if(ch=='\n') // got entire string: switch to peek method
+       bUsePeek=TRUE;
+     }
+    }
+}
+ * \endcode
  */
 
 #endif // __SWUART_H_INCLUDED__
