@@ -43,21 +43,21 @@
 
 /** defines parity */
 typedef enum _swUartParityE
- { swUEvenParity=2, swUOddParity=1, swUNoParity=0 } swUartParityE;
+{ swUEvenParity = 2, swUOddParity = 1, swUNoParity = 0 } swUartParityE;
 /** defines number of stop bits */
 typedef enum _swUartStopBitsE
- { swU1Stop=1, swU2Stop=2 } swUartStopBitsE;
+{ swU1Stop = 1, swU2Stop = 2 } swUartStopBitsE;
 /** \brief defines space and mark line states
  *
  * - space: 0 / LOW  / 0V (TTL) / +5~15V (EIA-232)
  * - mark:  1 / HIGH / 5V (TTL) / -5~15V (EIA-232)
  */
 typedef enum _swUartDataStateE
- { swUSpace_Low=0, swUMark_High=1 } swUartDataStateE;
+{ swUSpace_Low = 0, swUMark_High = 1 } swUartDataStateE;
 
 /** reception errors */
 typedef enum _swUartErrorBitDefinitionE
- { swUFramingError=0, swUParityError=1, swUOverrunError=2 } swUartErrorBitDefinitionE;
+{ swUFramingError = 0, swUParityError = 1, swUOverrunError = 2 } swUartErrorBitDefinitionE;
 
 /** I/O function type for setting the Tx line */
 typedef void (*swUartHwSetTxFct)(swUartDataStateE value);
@@ -122,9 +122,9 @@ boolean swUartSendIsBusy(byte swUartTxId /**< swUart Tx index, zero-based */);
  * \return \c TRUE when send streaming is completed
  */
 boolean swUartSendData(byte swUartTxId /**< swUart Tx index, zero-based */,
-                        const void* data /**< data to send, array of bytes or words depending on \c nbBits */,
-                        word dataSz /**< number of data items to send */,
-                        word* pIndex /**< reference to where we are in the sending */);
+                       const void* data /**< data to send, array of bytes or words depending on \c nbBits */,
+                       word dataSz /**< number of data items to send */,
+                       word* pIndex /**< reference to where we are in the sending */);
 
 /************************************************************
  * reception section

@@ -50,22 +50,22 @@
 
 /* basic macros to transform ticks to time and time to ticks */
 /** Timer tick to milliseconds, conversion macro */
-#define GTIMER_TICK_TO_MS(ticks) ((dword)GTIMER_TICK_MS*(ticks))
+#define GTIMER_TICK_TO_MS(ticks) ((dword)GTIMER_TICK_MS * (ticks))
 /** Timer tick to seconds, conversion macro */
-#define GTIMER_TICK_TO_S(ticks)  (((dword)GTIMER_TICK_MS*(ticks)+500)/1000)
+#define GTIMER_TICK_TO_S(ticks)  (((dword)GTIMER_TICK_MS * (ticks) + 500) / 1000)
 /** Timer tick to minutes, conversion macro */
-#define GTIMER_TICK_TO_MN(ticks) ((dword)GTIMER_TICK_MS*(ticks)+60*500)/60/1000)
+#define GTIMER_TICK_TO_MN(ticks) ((dword)GTIMER_TICK_MS * (ticks) + 60 * 500) / 60 / 1000)
 /** Timer tick to hours, conversion macro */
-#define GTIMER_TICK_TO_HRS(ticks) ((dword)GTIMER_TICK_MS*(ticks)+60*60*500))/60/60/1000)
+#define GTIMER_TICK_TO_HRS(ticks) ((dword)GTIMER_TICK_MS * (ticks) + 60 * 60 * 500)) / 60 / 60 / 1000)
 
 /** milliseconds to timer ticks, conversion macro */
-#define GTIMER_MS_TO_TICKS(ms) ((dword)(ms)/GTIMER_TICK_MS)
+#define GTIMER_MS_TO_TICKS(ms) ((dword)(ms) / GTIMER_TICK_MS)
 /** seconds to timer ticks, conversion macro */
-#define GTIMER_S_TO_TICKS(s) ((dword)(s)*1000/GTIMER_TICK_MS)
+#define GTIMER_S_TO_TICKS(s) ((dword)(s) * 1000 / GTIMER_TICK_MS)
 /** minutes to timer ticks, conversion macro */
-#define GTIMER_MN_TO_TICKS(m) ((dword)(m)*60*1000/GTIMER_TICK_MS)
+#define GTIMER_MN_TO_TICKS(m) ((dword)(m) * 60 * 1000 / GTIMER_TICK_MS)
 /** hours to timer ticks, conversion macro */
-#define GTIMER_HR_TO_TICKS(h) ((dword)(h)*60*60/GTIMER_TICK_MS)
+#define GTIMER_HR_TO_TICKS(h) ((dword)(h) * 60 * 60 / GTIMER_TICK_MS)
 
 /***************************/
 /* Compiler Error Handler  */
@@ -153,7 +153,7 @@ byte gtimerReserve(byte id /**< zero-based timer id */);
  * set back to the initial state. Errors return \c _N_GTIMERS
  * \return given parameter if ok, or \c _N_GTIMERS in case of error
  */
-byte gtimerRelease (byte id /**< zero-based timer id */);
+byte gtimerRelease(byte id /**< zero-based timer id */);
 
 /** \brief **starts a given timer to run**
  *
@@ -163,16 +163,15 @@ byte gtimerRelease (byte id /**< zero-based timer id */);
  * has reached its timeout
  * \warning minimum value for \p ticks is 2!
  */
-void gtimerInitAndStart (byte id /**< zero-based timer id */,
-                         dword ticks /**< number of timer ticks before time-out */,
-                         boolean bAuto /**< auto-reload flag */);
+void gtimerInitAndStart(byte id /**< zero-based timer id */,
+                        dword ticks /**< number of timer ticks before time-out */,
+                        boolean bAuto /**< auto-reload flag */);
 
 /** \brief **restarts the cycle initiated by #gtimerInitAndStart**
  *
  * It can be called any time during a cycle (before or after timeout condition has occurred)
  */
-void gtimerRestart (byte id /**< zero-based timer id */);
-
+void gtimerRestart(byte id /**< zero-based timer id */);
 
 /** \brief **stops timer counting**
  *
@@ -180,20 +179,19 @@ void gtimerRestart (byte id /**< zero-based timer id */);
  * intact The timer can be resumed for the remaining time by calling
  * #gtimerRestart
  */
-void gtimerFreeze (byte id /**< zero-based timer id */);
+void gtimerFreeze(byte id /**< zero-based timer id */);
 
 /** \brief **resumes counting**
  *
  * This function restarts the timer after #gtimerFreeze for the time remaining
  */
-void gtimerResume (byte id /**< zero-based timer id */);
+void gtimerResume(byte id /**< zero-based timer id */);
 
 /** \brief **rushes to time-out condition**
  *
  * This function ensures a timeout condition will occur within one timer tick
  */
-void gtimerFastForward (byte id /**< zero-based timer id */);
-
+void gtimerFastForward(byte id /**< zero-based timer id */);
 
 /** \brief **is timer running?**
  *
@@ -201,7 +199,7 @@ void gtimerFastForward (byte id /**< zero-based timer id */);
  * \note When *not* in auto-mode and timer has reached its timeout, timer is
  *       considered *no longer* running and then this will return FALSE
  */
-boolean gtimerRunning (byte id /**< zero-based timer id */);
+boolean gtimerRunning(byte id /**< zero-based timer id */);
 
 /** \brief **has timer reached a time-out condition?**
  *
@@ -212,14 +210,14 @@ boolean gtimerRunning (byte id /**< zero-based timer id */);
  * returned \c TRUE one time (per cycle): next calls to it within the next period
  * will return \c FALSE
  */
-boolean gtimerTO (byte id /**< zero-based timer id */);
+boolean gtimerTO(byte id /**< zero-based timer id */);
 
 /** \brief **remaining time before time-out**
  *
  * \return the number of timer ticks to go before timeout will become \c TRUE
  * \note in auto mode, returns the number of ticks to finish the current cycle
  */
-dword gtimerGetTimeToGo (byte id /**< zero-based timer id */);
+dword gtimerGetTimeToGo(byte id /**< zero-based timer id */);
 
 #ifdef GTIMER_IMPLEMENTS_CALLBACK
 
@@ -231,19 +229,19 @@ dword gtimerGetTimeToGo (byte id /**< zero-based timer id */);
  * - a pointer to its \c out returned value.
  *   This pointer can be \c NULL and in this case the returned value is not passed
  */
-void gtimerSetCallback (byte id /**< zero-based timer id */,
-                        gtimerCallbackPtr pCallback /**< call back function */,
-                        dword inValue /**< initial input value for the call-back function */,
-                        dword* pOutValue/**< reference to out variable call-back can update */);
+void gtimerSetCallback(byte id /**< zero-based timer id */,
+                       gtimerCallbackPtr pCallback /**< call back function */,
+                       dword inValue /**< initial input value for the call-back function */,
+                       dword* pOutValue /**< reference to out variable call-back can update */);
 
 /** \brief **set new call-back input value**
  */
-void gtimerSetCallbackInput (byte id /**< zero-based timer id */,
-                        dword inValue /**< updated input value for the call-back function */);
+void gtimerSetCallbackInput(byte id /**< zero-based timer id */,
+                            dword inValue /**< updated input value for the call-back function */);
 
 /** \brief **detach call-back function**
  */
-void gtimerClearCallback (byte id /**< zero-based timer id */);
+void gtimerClearCallback(byte id /**< zero-based timer id */);
 
 /*
  * Disable any call-back previously defined

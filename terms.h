@@ -18,10 +18,10 @@
  #define NULL ((void*)0) /* null pointer */
 #endif // NULL
 
-typedef unsigned char   boolean; /**< should contain TRUE or FALSE */
-typedef unsigned char   byte; /**< shorthand for 8-bit unsigned */
-typedef unsigned short  word; /**< shorthand for 16-bit unsigned */
-typedef unsigned long   dword; /**< shorthand for 32-bit unsigned */
+typedef unsigned char boolean;   /**< should contain TRUE or FALSE */
+typedef unsigned char byte;   /**< shorthand for 8-bit unsigned */
+typedef unsigned short word;  /**< shorthand for 16-bit unsigned */
+typedef unsigned long dword;   /**< shorthand for 32-bit unsigned */
 typedef signed char schar; /**< shorthand for 8-bit signed */
 typedef short int sint; /**< alias for short int */
 

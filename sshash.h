@@ -83,18 +83,18 @@ extern "C" {
  * Only given to compute internal hash table size needed at contruction time
  */
 typedef struct _ssht_internal_tag_HashTableLinkElt
- {
-   void POINTER_ATTR* mData;   /* pointer to target structure */
-   unsigned short mNextLinkIdx;	/* index to next link element */
- } _sshsh_HashTableLinkElt;
+{
+ void POINTER_ATTR* mData;     /* pointer to target structure */
+ unsigned short mNextLinkIdx;   /* index to next link element */
+} _sshsh_HashTableLinkElt;
 
 typedef struct _ssht_internal_tag_HashTableEntry
- {
-  unsigned short mFirstLinkIdx; /* index to first link element */
- } _sshsh_HashTableEntry;
- 
+{
+ unsigned short mFirstLinkIdx;  /* index to first link element */
+} _sshsh_HashTableEntry;
+
 /** \brief user defined function comparing 2 keys
- * defines a function which compares keys within two data structures \c s1 ans \c s2 
+ * defines a function which compares keys within two data structures \c s1 ans \c s2
  * return value expected:
  *  - <0 if key within s1 is less than key within s2
  *  - zero if both keys are equal
@@ -105,40 +105,40 @@ typedef int (*sshsh_fctCmp)(void POINTER_ATTR* s1, void POINTER_ATTR* s2);
  * defines a function which hash value computes value of a key within data structure \c s
  * return value expected: a number between 0 and the \c modulo (as provided in \ref sshsh_ctor)
  */
-typedef unsigned short(*sshsh_fctComputeHash)(void POINTER_ATTR* s, unsigned short modulo);
+typedef unsigned short (*sshsh_fctComputeHash)(void POINTER_ATTR* s, unsigned short modulo);
 
 /*
  * member definitions for the hash table class
  */
 typedef struct _ssht_internal_tag_unsigned
- {
-  /* Pointer to the first element of the internal buffer: the hash table
-     Each entry point has an index to a link list */
-  _sshsh_HashTableEntry POINTER_ATTR* mHashTable;
-  /* Pointer to the second element of the internal buffer: the link list table
-     this table is composed of interspeded lists whose head index are recorded in the
-     hash table and whose tails are the 'null' element at index mMaxElement */
-  _sshsh_HashTableLinkElt POINTER_ATTR* mLinkTable;
-  /* hash table size */
-  unsigned short mHashModulo;
-  /* link list table size */
-  unsigned short mMaxElements;
-  /* number of added elements */
-  unsigned short mElementCount;
-  /* first free place where a new element will be added */
-  unsigned mFirstFree;
-  /* call-back function for comparisons */
-  sshsh_fctCmp fctCompare;
-  /* call-back function for computing hash value */
-  sshsh_fctComputeHash fctComputeHashValue;
- } _sshsh_HashTable;
+{
+ /* Pointer to the first element of the internal buffer: the hash table
+    Each entry point has an index to a link list */
+ _sshsh_HashTableEntry POINTER_ATTR* mHashTable;
+ /* Pointer to the second element of the internal buffer: the link list table
+    this table is composed of interspeded lists whose head index are recorded in the
+    hash table and whose tails are the 'null' element at index mMaxElement */
+ _sshsh_HashTableLinkElt POINTER_ATTR* mLinkTable;
+ /* hash table size */
+ unsigned short mHashModulo;
+ /* link list table size */
+ unsigned short mMaxElements;
+ /* number of added elements */
+ unsigned short mElementCount;
+ /* first free place where a new element will be added */
+ unsigned mFirstFree;
+ /* call-back function for comparisons */
+ sshsh_fctCmp fctCompare;
+ /* call-back function for computing hash value */
+ sshsh_fctComputeHash fctComputeHashValue;
+} _sshsh_HashTable;
 
 /*
  * Macro that gives the necessary storage size of the internal table given
  * a modulo and the max number of managed elements
  */
-#define HASHTABLE_SPACE_REQUIREMENT(MODULO, MAXELTS)\
-  (MODULO)*sizeof(_sshsh_HashTableEntry)+(MAXELTS)*sizeof(_sshsh_HashTableLinkElt)
+#define HASHTABLE_SPACE_REQUIREMENT(MODULO, MAXELTS) \
+ (MODULO)*sizeof(_sshsh_HashTableEntry) + (MAXELTS)*sizeof(_sshsh_HashTableLinkElt)
 
 /*
  *  Constructor
@@ -152,8 +152,8 @@ typedef struct _ssht_internal_tag_unsigned
  *  fctComputeHashValue: user defined function for computing hash value of a key within a data structure
  */
 void sshsh_ctor(_sshsh_HashTable POINTER_ATTR* This,
-		  unsigned short modulo, unsigned short maxElts, void POINTER_ATTR* hashTable,
-		  sshsh_fctCmp* fCompare, sshsh_fctComputeHash fctComputeHashValue);
+                unsigned short modulo, unsigned short maxElts, void POINTER_ATTR* hashTable,
+                sshsh_fctCmp* fCompare, sshsh_fctComputeHash fctComputeHashValue);
 /*
  * Static method that gives the necessary storage size of the internal table given
  * a modulo and the max number of managed elements
@@ -207,14 +207,14 @@ void POINTER_ATTR* sshsh_sortedIter(_sshsh_HashTable POINTER_ATTR* This, long* p
 /* Low level stuff (given for debug purpose only) */
 
 /*
- * Gives the hash value given a key 
+ * Gives the hash value given a key
  * This value lies within modulo range (0; modulo-1)
  * maxStrLg is the max key length
  */
 unsigned short _sshsh_computeHValue(const char POINTER_ATTR* key, unsigned short modulo, unsigned short maxStrLg);
 
 #ifdef  __cplusplus
- } // extern C
+}  // extern C
 #endif
 
 /**

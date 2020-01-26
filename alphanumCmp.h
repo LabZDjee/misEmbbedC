@@ -54,7 +54,6 @@
  * \date 2015/05
  */
 
-
 /** \brief typedef which defines the maximum offset to a string
  * normally unsigned short should fit
  * it is the equivalent of \c size_t in standard library
@@ -100,8 +99,8 @@ typedef struct ANCns_sProfile
  * - positive if \p s1 is greater then \p s2 (e.g.: s1="zoo", s2="boo")
  */
 int ANCnsStrCmp(const char* s1 /**<  first string to compare */,
-		        const char* s2 /**<  second string to compare */,
-			    const ANCnsSProfile* profile /**< reference to comparison parameters - can be NULL */);
+                const char* s2 /**<  second string to compare */,
+                const ANCnsSProfile* profile /**< reference to comparison parameters - can be NULL */);
 
 /** \brief Low level: **tests if a character is a decimal digit**
  *
@@ -128,8 +127,8 @@ int ANCnsIsDigit(char c /**< character under test */);
  * \return extracted value (0 in case of failure)
  */
 unsigned long ANCnsGetValue(const char* str /**< string to test */,
-		                    int maxLength /**< max. length of the comparison - -1 for no max length */,
-							ANCnsStrSize* pOffset /**< in/out: offset within str - can be NULL */);
+                            int maxLength /**< max. length of the comparison - -1 for no max length */,
+                            ANCnsStrSize* pOffset /**< in/out: offset within str - can be NULL */);
 
 /** \brief Low level: **get the upper case value of a given character**
  *
@@ -149,7 +148,7 @@ char ANCnsToUpper(char c /**< reference character */);
  *  - zero-based offset of position of \p c within \p list
  */
 int ANCnsStrChr(char c /**< character under test */,
-		        const char* list /**< list of characters to look into */);
+                const char* list /**< list of characters to look into */);
 
 /** \brief Low level: **Extracts a string entity (no value-no space, value, spaces)**
  *
@@ -180,9 +179,9 @@ int ANCnsStrChr(char c /**< character under test */,
  *  - 3: characters (non-numeric and non-space token) at offset
  */
 int ANCnsExtract(const char* str /**< reference to string to search into */,
-		         const ANCnsSProfile* profile /**< reference parameters */,
-				 unsigned long* pResult/**< out: reference to result */,
-				 ANCnsStrSize* pOffset/**< in/out: offset within \p str */);
+                 const ANCnsSProfile* profile /**< reference parameters */,
+                 unsigned long* pResult /**< out: reference to result */,
+                 ANCnsStrSize* pOffset /**< in/out: offset within \p str */);
 
 /** \brief **fast alphanumeric comparison of two C strings**
  *
@@ -201,13 +200,11 @@ int ANCnsExtract(const char* str /**< reference to string to search into */,
  * - positive if \p s1 is greater then \p s2 (e.g.: s1="zoo", s2="boo")
  */
 int ANCnsFastStrncmp(const char* s1 /**< first string to compare */,
-		             const char* s2 /**< second string to compare */,
-					 ANCnsStrSize maxLength /**< max length of comparison */);
-
+                     const char* s2 /**< second string to compare */,
+                     ANCnsStrSize maxLength /**< max length of comparison */);
 
 /**
  * \}
  */
 
 #endif /* __ALPHANUM_CMP_H_INC__ */
-

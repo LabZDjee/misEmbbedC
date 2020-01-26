@@ -22,20 +22,20 @@ Purpose: Manager of soft timers
 /*                                                                          */
 /***************************************************************************/
 
-#define TIMER_COUNT_VALUE   ((GTIMER_TICK_MS)*(OSC_FREQUENCY)/(1000))
+#define TIMER_COUNT_VALUE   ((GTIMER_TICK_MS)*(OSC_FREQUENCY) / (1000))
 
 typedef struct
 {
-byte         req:1;                    // in use or not
-byte         running:1;                // started or not
-byte         timeout:1;                // reached a timeout
-byte         bAuto:1;                  // auto-reload or not
-dword        count;                    // periods of GTIMER_TICK_MS to run before time out
-dword        count0;                   // reload value
+ byte req : 1;                         // in use or not
+ byte running : 1;                     // started or not
+ byte timeout : 1;                     // reached a timeout
+ byte bAuto : 1;                       // auto-reload or not
+ dword count;                          // periods of GTIMER_TICK_MS to run before time out
+ dword count0;                         // reload value
 #ifdef GTIMER_IMPLEMENTS_CALLBACK
-gtimerCallbackPtr  pCallback;          // function to call when timer expires
-dword        inValue;                  // its 'in' parameter
-dword*       pOutValue;                // reference to its 'out' parameter
+ gtimerCallbackPtr pCallback;          // function to call when timer expires
+ dword inValue;                        // its 'in' parameter
+ dword* pOutValue;                     // reference to its 'out' parameter
 #endif
 }
 TimerType;
@@ -46,7 +46,7 @@ TimerType;
 /*                                                                          */
 /****************************************************************************/
 
-static void init_Timer    (byte id);
+static void init_Timer(byte id);
 
 /****************************************************************************/
 /*                                                                          */
@@ -63,7 +63,7 @@ volatile boolean bTimerInterruptFired; // true when the interrupt triggered and 
 /****************************************************************************/
 
 /* array of gTimers */
-static TimerType Timer [_N_GTIMERS];
+static TimerType Timer[_N_GTIMERS];
 
 /****************************************************************************/
 /*                                                                          */
@@ -72,157 +72,171 @@ static TimerType Timer [_N_GTIMERS];
 /****************************************************************************/
 
 /****************************************************************************/
-void gtimerInitModule (void)
+void gtimerInitModule(void)
 /****************************************************************************/
 {
  byte id;
 
  for (id = 0; id < _N_GTIMERS; id++)
-  init_Timer (id);
+  {
+   init_Timer(id);
+  }
 }
 
-
 /****************************************************************************/
-byte gtimerRequest (void)
+byte gtimerRequest(void)
 /****************************************************************************/
 {
-byte id;
+ byte id;
 
-for (id = 0; id < _N_GTIMERS; id++)
+ for (id = 0; id < _N_GTIMERS; id++)
   {
-  if (!Timer [id].req)
-   {
-    Timer [id].req = TRUE;
-    break;
-   }
+   if (!Timer[id].req)
+    {
+     Timer[id].req = TRUE;
+     break;
+    }
   }
 
-return (id);
+ return id;
 }
 
 /****************************************************************************/
-byte gtimerReserve (byte id)
+byte gtimerReserve(byte id)
 /****************************************************************************/
 {
  if (id >= _N_GTIMERS)
-  return (_N_GTIMERS);
+  {
+   return _N_GTIMERS;
+  }
 
- if (Timer [id].req)
-  return (_N_GTIMERS);
+ if (Timer[id].req)
+  {
+   return _N_GTIMERS;
+  }
 
- Timer [id].req = TRUE;
+ Timer[id].req = TRUE;
 
- return (id);
+ return id;
 }
 
 /****************************************************************************/
-byte gtimerRelease (byte id)
+byte gtimerRelease(byte id)
 /****************************************************************************/
 {
-if (id >= _N_GTIMERS)
-  return (_N_GTIMERS);
+ if (id >= _N_GTIMERS)
+  {
+   return _N_GTIMERS;
+  }
 
-init_Timer (id);
+ init_Timer(id);
 
-return (id);
+ return id;
 }
 
-
 /****************************************************************************/
-void gtimerInitAndStart (byte id, dword count, boolean bAuto)
+void gtimerInitAndStart(byte id, dword count, boolean bAuto)
 /****************************************************************************/
 {
- if(Timer[id].req==FALSE)
-  return;
- if(count<2)
-  count = 2;
- Timer[id].count   = count;               // set count value
- Timer[id].count0  = count;               // set reload value
+ if (Timer[id].req == FALSE)
+  {
+   return;
+  }
+ if (count < 2)
+  {
+   count = 2;
+  }
+ Timer[id].count = count;                 // set count value
+ Timer[id].count0 = count;                // set reload value
  Timer[id].bAuto = bAuto;                 // auto restarts at timeout
  Timer[id].timeout = FALSE;               // clears timeout condition
  Timer[id].running = TRUE;                // start timer
 }
 
 /****************************************************************************/
-void gtimerRestart (byte id)
+void gtimerRestart(byte id)
 /****************************************************************************/
 {
  gtimerInitAndStart(id, Timer[id].count0, Timer[id].bAuto);
 }
 
-
 /****************************************************************************/
-void gtimerFreeze (byte id)
+void gtimerFreeze(byte id)
 /****************************************************************************/
 {
  Timer[id].running = FALSE;                   // stop running
 }
 
-
 /****************************************************************************/
-void gtimerResume (byte id)
+void gtimerResume(byte id)
 /****************************************************************************/
 {
- if(Timer[id].req!=FALSE ||  (Timer[id].bAuto==FALSE && Timer[id].timeout))
-  Timer[id].running = TRUE;     // start timer with last count
+ if (Timer[id].req != FALSE || (Timer[id].bAuto == FALSE && Timer[id].timeout))
+  {
+   Timer[id].running = TRUE;    // start timer with last count
+  }
 }
 
 /****************************************************************************/
-void gtimerFastForward (byte id)
+void gtimerFastForward(byte id)
 /****************************************************************************/
 {
- if(Timer[id].req!=FALSE ||  Timer[id].running!=FALSE)
-  Timer[id].count=1;
+ if (Timer[id].req != FALSE || Timer[id].running != FALSE)
+  {
+   Timer[id].count = 1;
+  }
 }
 
 /****************************************************************************/
-boolean gtimerRunning (byte id)
+boolean gtimerRunning(byte id)
 /****************************************************************************/
 {
- return (Timer [id].running);
+ return Timer[id].running;
 }
 
 /****************************************************************************/
-boolean gtimerTO (byte id)
+boolean gtimerTO(byte id)
 /****************************************************************************/
 {
- boolean bRet=Timer[id].timeout;
- if(Timer[id].bAuto)
-  Timer[id].timeout=FALSE;
- return (bRet);
+ boolean bRet = Timer[id].timeout;
+ if (Timer[id].bAuto)
+  {
+   Timer[id].timeout = FALSE;
+  }
+ return bRet;
 }
 
 /****************************************************************************/
-dword gtimerGetTimeToGo (byte id)
+dword gtimerGetTimeToGo(byte id)
 /****************************************************************************/
 {
- return (Timer [id].count);
+ return Timer[id].count;
 }
 
 #ifdef GTIMER_IMPLEMENTS_CALLBACK
 /****************************************************************************/
-void gtimerSetCallback (byte id, gtimerCallbackPtr pCallback, dword inValue, dword* pOutValue)
+void gtimerSetCallback(byte id, gtimerCallbackPtr pCallback, dword inValue, dword* pOutValue)
 /****************************************************************************/
 {
- Timer [id].pCallback = pCallback;
- Timer [id].inValue = inValue;
- Timer [id].pOutValue = pOutValue;
+ Timer[id].pCallback = pCallback;
+ Timer[id].inValue = inValue;
+ Timer[id].pOutValue = pOutValue;
 }
 
 /****************************************************************************/
-void gtimerSetCallbackInput (byte id, dword inValue )
+void gtimerSetCallbackInput(byte id, dword inValue)
 /****************************************************************************/
 {
- Timer [id].inValue = inValue;
+ Timer[id].inValue = inValue;
 }
 
 /****************************************************************************/
-void gtimerClearCallback (byte id)
+void gtimerClearCallback(byte id)
 /****************************************************************************/
 {
- Timer [id].pCallback = NULL;
- Timer [id].inValue = 0;
- Timer [id].pOutValue = NULL;
+ Timer[id].pCallback = NULL;
+ Timer[id].inValue = 0;
+ Timer[id].pOutValue = NULL;
 }
 #endif
 
@@ -233,10 +247,10 @@ void gtimerClearCallback (byte id)
 /****************************************************************************/
 
 /****************************************************************************/
-static void init_Timer (byte id)
+static void init_Timer(byte id)
 /****************************************************************************/
 {
- TimerType* pTimer=Timer+id;
+ TimerType* pTimer = Timer + id;
 
  pTimer->req = FALSE;
  pTimer->count = 0;
@@ -250,39 +264,42 @@ static void init_Timer (byte id)
 
 }
 
-
 /****************************************************************************/
-void gtimerOnTick (void)
+void gtimerOnTick(void)
 /****************************************************************************/
 {
  byte id;
- TimerType* pTimer=Timer;
+ TimerType* pTimer = Timer;
 
- bTimerInterruptFired=FALSE;
+ bTimerInterruptFired = FALSE;
 
  for (id = 0; id < _N_GTIMERS; id++, pTimer++)
   {
    if (pTimer->running && pTimer->count > 0)
     {
      pTimer->count--;
-     if(pTimer->count == 0)
+     if (pTimer->count == 0)
       {
-        pTimer->timeout = TRUE;
-        if(pTimer->bAuto)
+       pTimer->timeout = TRUE;
+       if (pTimer->bAuto)
+        {
          pTimer->count = pTimer->count0;
-        else
-         pTimer->running=FALSE;
+        }
+       else
+        {
+         pTimer->running = FALSE;
+        }
     #ifdef GTIMER_IMPLEMENTS_CALLBACK
-        if (pTimer->pCallback!=NULL)
-         {
-          dword outValue=pTimer->pCallback(id, pTimer->inValue);
-          if(pTimer->pOutValue!=NULL)
-          *pTimer->pOutValue = outValue;
-         }
+       if (pTimer->pCallback != NULL)
+        {
+         dword outValue = pTimer->pCallback(id, pTimer->inValue);
+         if (pTimer->pOutValue != NULL)
+          {
+           *pTimer->pOutValue = outValue;
+          }
+        }
     #endif
       }
     }
   }
 }
-
-

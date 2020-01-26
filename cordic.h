@@ -6,11 +6,11 @@
 
   Adaption:       Gerard Gauthier
   Author:         J. Pitts Jarvis III (+), 3Com Corporation, October 1990
-  Target Device:  Portable 
+  Target Device:  Portable
 
-  (+) very sadly, J. Pitts Jarvis III born in Fayetteville, Arkansas on November 3, 1946 
+  (+) very sadly, J. Pitts Jarvis III born in Fayetteville, Arkansas on November 3, 1946
       died suddenly of a heart attack on October 10, 2003, in Palo Alto, California.
-  
+
   Computes CORDIC (COordinate, Rotation DIgital Computer)
   constants and exercises the basic algorithms
   Represents all numbers in fixed point notation, as a 32-bit long integer:
@@ -45,9 +45,9 @@ extern "C" {
 
 #define cordic_longBits      32 /* never change this! */
 #define cordic_fractionBits  16 /* fractional part - this one can be redefined max: 29 */
-#define cordic_nonFracBits   (cordic_longBits-cordic_fractionBits)
-#define cordic_One           (1L<<cordic_fractionBits)
-#define cordic_HalfPi        (cordic_One | 0x921fb544>>cordic_nonFracBits)
+#define cordic_nonFracBits   (cordic_longBits - cordic_fractionBits)
+#define cordic_One           (1L << cordic_fractionBits)
+#define cordic_HalfPi        (cordic_One | 0x921fb544 >> cordic_nonFracBits)
 
 #ifdef CORDIC_TEST_FCT
 
@@ -69,7 +69,7 @@ extern "C" {
 typedef long cordic_Number;
 
 //****************************************
-//  global variable definitions 
+//  global variable definitions
 //****************************************
 
 /* X, Y, Z result registers of cordic functions */
@@ -78,7 +78,7 @@ extern cordic_Number cordic_X, cordic_Y, cordic_Z;
 /***************************************
  * seeds for circular and hyperbolic
  ***************************************/
-/* 'K' prescaling constant for circular functions */ 
+/* 'K' prescaling constant for circular functions */
 /*   cordic_Circular(cordic_X0C, 0, a) -> cos(a), sin(a), 0 */
 extern cordic_Number cordic_X0C;
 /* 'K' prescaling constant for hyperbolic functions */
@@ -86,7 +86,7 @@ extern cordic_Number cordic_X0C;
 extern cordic_Number cordic_X0H;
 /* constant useful for reciprocal hyperbolic function: (cordic_X0H/2)^2 */
 /*   cordic_InvertHyperbolic(a+1, a-1, 0) -> 2*sqrt(a)/cordic_X0R, 0, ln(a)/2 */
-extern cordic_Number cordic_X0R;  
+extern cordic_Number cordic_X0R;
 
 /* e: base of natural logarithms */
 extern cordic_Number cordic_E;
@@ -98,7 +98,7 @@ extern cordic_Number cordic_OneOverE;
 extern cordic_Number cordic_HalfLnX0R;
 
 //****************************************
-//  function prototypes 
+//  function prototypes
 //****************************************
 // init
 void cordic_Init(void);

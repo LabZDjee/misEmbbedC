@@ -29,8 +29,6 @@
 ***************************************************************************
 */
 
-
-
 #include <stdio.h>
 
 #ifdef __linux__
@@ -55,7 +53,6 @@
 
 #endif
 
-
 #ifndef timer_INCLUDED
 #define timer_INCLUDED
 
@@ -63,16 +60,12 @@
 extern "C" {
 #endif
 
-
 int start_timer(int, void (*)(void));
 
 void stop_timer(void);
-
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
 #endif
-
-

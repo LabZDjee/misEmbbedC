@@ -25,7 +25,6 @@
 extern "C" {
 #endif
 
-
 //****************************************
 //  include files
 //****************************************
@@ -37,9 +36,9 @@ extern "C" {
  * Some useful math around fractional numbers
  */
 /* Quick multiply by five. Beware: cn is expanded more than one time */
-#define qn_MULT5(cn)  ((cn<<2)+cn)
+#define qn_MULT5(cn)  ((cn << 2) + cn)
 /* Quick multiply by ten. Beware: cn is expanded more than one time */
-#define qn_MULT10(cn) (qn_MULT5(cn)<<1)
+#define qn_MULT10(cn) (qn_MULT5(cn) << 1)
 
 /*
  * Maximum number of fractional bits
@@ -107,7 +106,7 @@ extern unsigned char qn_fractionBits;
 //****************************************
 //  function prototypes
 //****************************************
-void  qn_Init(unsigned char nbFractionalBits);
+void qn_Init(unsigned char nbFractionalBits);
 short qn_ReadDecimalNumber(const char* pStr, qn_Number* pResult);
 short qn_SPrintFDecimalNumber(qn_Number value, char* pResult, signed char nbDec, unsigned char nbWidth, unsigned char bThousandSep);
 qn_Number qn_Mul(qn_Number a, qn_Number b, unsigned char* pErr);
