@@ -24,8 +24,8 @@ Here is the percentage of the final value we can get after some time constant mu
 
 And below is the maximum number of input repeats it takes to reach a number of *tau*'s and the full convergence (100%) versus `divider`: 
 
-|div\tau|1|2|3|4|5|6|7|8|9|10|converge|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|div/tau|1|2|3|4|5|6|7|8|9|10|converge|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|---|
 |1|2|2|2|2|2|2|2|2|2|2|2|
 |2|3|4|5|7|8|10|11|13|14|15|17|
 |3|4|6|9|11|14|16|19|21|23|26|28|
