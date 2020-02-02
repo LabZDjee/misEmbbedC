@@ -51,6 +51,11 @@ void main()
  for (divider = 1; divider <= 16; divider++)
   {
    shortIIRLowPassInit(divider, initial, &f);
+   if (shortIIRLowPassGet(&f) != initial)
+    {
+     printf("failure: initial at %hi is returned as %hi\n", initial, shortIIRLowPassGet(&f));
+     return;
+    }
    tau = 1;
    printf("%- 4i\t", divider);
    for (n = 1; n <= MAX_STEPS; n++)

@@ -10,7 +10,7 @@
 
  */
 
-/* struct which internally stores management date: don't mess with them normally */
+/* struct which internally stores management data: don't mess with them normally */
 typedef struct _tShortIIRLowPass {
  long acc;
  unsigned short divider;
