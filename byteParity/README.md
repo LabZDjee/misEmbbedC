@@ -1,4 +1,4 @@
-# Calculate Parity of a Byte
+# Calculate [Parity Bit](https://en.wikipedia.org/wiki/Parity_bit) of a Byte
 
 Reasonably quick because of a 16-byte look-up table which 
 
