@@ -5,5 +5,6 @@ Misc C files of general purpose interest in embedded constrained environments
 - **swUart**: soft UART. Used to implement software UART's which depend on `gTimer` for their timings
 - **alphanumCmp**: extended alphanumeric comparison (also taking string length, character case, spaces into account as options)
 - **shortIIRLowPassFilter**: implementation of an IIR (Infinite Impulse Response) first order low-pass filter on `short` integers
+- **byteParity**: calculation of [Parity Bit](https://en.wikipedia.org/wiki/Parity_bit) of a Byte
 
  
