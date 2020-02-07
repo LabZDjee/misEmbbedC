@@ -1,6 +1,6 @@
 # Calculate [Parity Bit](https://en.wikipedia.org/wiki/Parity_bit) of a Byte
 
-Calculates the imparity of a 8-bit byte (octet), in other word estimates whether the number of bits set to one in this byte is an odd number
+Calculates the imparity of a 8-bit byte (octet), that is, estimates whether number of bits set to one in this byte is an odd number
 
 Reasonably quick because of a 16-byte look-up table which splits byte into two 4-bit nibbles, so a compromise between speed and memory occupation
 
