@@ -38,3 +38,26 @@ int calcByteOddParity(unsigned char byte)
 {
  return __nibbleParity_LUT__[byte & 15] ^ __nibbleParity_LUT__[byte >> 4];
 }
+
+unsigned char byteWithParity(unsigned char byte, int parityType)
+{
+ byte &= 0x7f;
+ switch (parityType)
+  {
+   case 1:
+    if (CALC_BYTE_ODD_PARITY(byte))
+     {
+      return byte;
+     }
+    return byte | 0x80;
+   case 2:
+    if (CALC_BYTE_ODD_PARITY(byte))
+     {
+      return byte | 0x80;
+     }
+   // no break on purpose
+   case 0:
+   default:
+    return byte;
+  }
+}

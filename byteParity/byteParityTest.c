@@ -18,6 +18,7 @@ int slowCalculateOddity(unsigned char byte)
 void main()
 {
  short byte;
+ unsigned char expected;
  byteOddParityInit();
  printf("LUT: odd parity for nibble at\n");
  for (byte = 0; byte < sizeof(__nibbleParity_LUT__); byte++)
@@ -31,14 +32,35 @@ void main()
    int slow = slowCalculateOddity(byte);
    if (quick != slow)
     {
-     printf("failure for byte 0x%02hx oddity should be %i and calcOddParity provided %i\n",
+     printf("failure for byte 0x%02hx: oddity should be %i and calcOddParity provided %i\n",
             byte, slow, quick);
      return;
     }
    if (CALC_BYTE_ODD_PARITY(byte) != slow)
     {
-     printf("failure for byte 0x%02hx oddity should be %i and CALC_BYTE_ODD_PARITY provided %i\n",
+     printf("failure for byte 0x%02hx: oddity should be %i and CALC_BYTE_ODD_PARITY provided %i\n",
             byte, slow, CALC_BYTE_ODD_PARITY(byte));
+     return;
+    }
+   expected = byte & 127;
+   if (byteWithParity(byte, 0) != expected)
+    {
+     printf("failure for byte 0x%02hx: byteWithParity(byte, 0) expected to return 0x%02hx\n",
+            byte, (short)expected);
+     return;
+    }
+   expected |= slowCalculateOddity(expected) ? 0 : 0x80;
+   if (byteWithParity(byte, 1) != expected)
+    {
+     printf("failure for byte 0x%02hx: byteWithParity(byte, 1) expected to return 0x%02hx\n",
+            byte, (short)expected);
+     return;
+    }
+   expected ^= 0x80;
+   if (byteWithParity(byte, 2) != expected)
+    {
+     printf("failure for byte 0x%02hx: byteWithParity(byte, 2) expected to return 0x%02hx\n",
+            byte, (short)expected);
      return;
     }
   }
