@@ -29,12 +29,12 @@ void byteOddParityInit();
 int calcByteOddParity(unsigned char byte);
 
 /*
-  Set parity bit of a 7-bit byte
-  Depending on parityType:
-   1: set odd parity
-   2: set event parity
-   0: simply return the byte with most significant bit at 0
+ Add parity bit of a 7-bit byte by setting its eight-bit to zero or one as necessary
 
+ Depending on parityType:
+  - 1: return byte with parity set to odd
+  - 2: return byte with parity set to even
+  - 0: simply return the byte with most significant bit set to 0
 */
 unsigned char byteWithParity(unsigned char byte, int parityType);
 
